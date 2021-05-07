@@ -1,9 +1,11 @@
 import Block from './block.js'
 // 돔 셀렉터
 const container = document.querySelector('.container');
-const domScore = document.querySelector('.score');
+const currentScore = document.querySelector('.score');
 const modalGameOver = document.querySelector('.modal-gameover');
+const btnRetry = document.querySelector('.btn-retry');
 const modalPause = document.querySelector('.modal-pause');
+const finalScore = document.querySelector('.modal-container .score');
 
 // 게임에 사용되는 변수
 const MY = 20;
@@ -25,9 +27,13 @@ let downInterval;
 
 // 실행
 init();
-
+btnRetry.addEventListener('click',init)
 // 게임을 시작하는 함수
 function init() {
+    // 스코어 초기화
+    resetScore();
+    // modal 초기화
+    modalGameOver.classList.remove('is-show');
     // 키보드 이벤트 바인딩
     window.addEventListener(`keydown`,keyEvent);
     // 게임 배경만들기
@@ -107,10 +113,11 @@ function renderBlock(movetype = '') {
             // 원래 임시로 담겨있던 무빙블록아이템으로 다시 반환해준다.
             tempMovingItem = { ...movingItem }
             // 무한 콜스택에서 벗어나기 위해 settimeout을 썼다.
+
+            // 게임종료시 진입 구간
             if(movetype == 'retry') {
-                console.log('asdf')
-                window.removeEventListener('keydown',keyEvent);
-                clearInterval(downInterval);
+                gameOver(score);
+                
                 return;
             }
             setTimeout(()=>{
@@ -218,7 +225,6 @@ function keyEvent(e) {
             case 38:
                 // direction 값을 올리면 다른 배열을 호출해서 모양이 변하게한다.
                 e.preventDefault();
-                console.log('UP')
                 moveDirection()
                 break;
             // 나머지 값은 블록을 움직인다.
@@ -266,11 +272,22 @@ function togglepauseModal() {
         modalPause.classList.add('is-show');
     }
 }
+function resetScore() {
+    score = 0;
+    currentScore.innerText = 0;
+    finalScore.innerText = 0;
+}
+function gameOver() {
+    clearInterval(downInterval);
+    finalScore.innerText = score;
+    modalGameOver.classList.add('is-show');
+    window.removeEventListener('keydown',keyEvent);
+}
 // score 업데이트 애니메이션
 function updateScore(score) {
-    domScore.classList.add('updating');
+    currentScore.classList.add('updating');
     setTimeout(()=>{
-        domScore.innerText = score;
-        domScore.classList.remove('updating')    
+        currentScore.innerText = score;
+        currentScore.classList.remove('updating')    
     },300)
 }
