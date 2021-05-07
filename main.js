@@ -1,12 +1,15 @@
 import Block from './block.js'
 // 돔 셀렉터
 const container = document.querySelector('.container');
-const scoreBoard = document.querySelector('.info__score');
-const modalGameOver = document.querySelector('.modal__gameover')
+const domScore = document.querySelector('.score');
+const modalGameOver = document.querySelector('.modal-gameover');
+const modalPause = document.querySelector('.modal-pause');
+
 // 게임에 사용되는 변수
 const MY = 20;
 const MX = 10;
-let speed = 200;
+let playing = false;
+let speed = 500;
 let score = 0;
 let countTime = 0;
 let tempMovingItem;
@@ -16,6 +19,7 @@ let movingItem = {
     top: 0,
     left: 3,
 }
+let downInterval;
 
 
 
@@ -24,10 +28,16 @@ init();
 
 // 게임을 시작하는 함수
 function init() {
+    // 키보드 이벤트 바인딩
+    window.addEventListener(`keydown`,keyEvent);
+    // 게임 배경만들기
     drawBoard();
+    // 랜덤함 블록 준비하기
     movingItem.type = createType(); 
-    tempMovingItem = { ...movingItem }; // 임시로 움직일 블록의 속성을 무빙블록에서 받아옴
-    renderBlock();
+    // 미리 움직여줄 블록의 속성을 무빙블록에서 복사함
+    tempMovingItem = { ...movingItem };
+    // 블록만들기 
+    createBlock();
 }
 
 // 게임 배경 테이블 만들기
@@ -97,8 +107,14 @@ function renderBlock(movetype = '') {
             // 원래 임시로 담겨있던 무빙블록아이템으로 다시 반환해준다.
             tempMovingItem = { ...movingItem }
             // 무한 콜스택에서 벗어나기 위해 settimeout을 썼다.
+            if(movetype == 'retry') {
+                console.log('asdf')
+                window.removeEventListener('keydown',keyEvent);
+                clearInterval(downInterval);
+                return;
+            }
             setTimeout(()=>{
-                renderBlock();
+                renderBlock('retry');
                 // 움직이는 방향이 top y축 값이면 값을 고정한다.
                 if(movetype === 'top') {
                     seizeBlock();
@@ -125,10 +141,17 @@ function checkAvailable(item) {
 }
 
 // 새로운 블록을 만드는 함수 (새로운 블록을 만들때 움직이는 *블록과 움직일 블록 둘다* 초기화 시켜야 된다.)
-function createBlock() {    
+function createBlock() {
+    
+    clearInterval(downInterval);
+    playing = true;
+    downInterval = setInterval(()=>{
+        moveItem('top',1);
+    },speed)
+
     movingItem.type = createType(); //랜덤타입을 결정하는 함수
-    movingItem.left = 3;
     movingItem.top = 0;
+    movingItem.left = 3;
     movingItem.direction = 0;
     tempMovingItem = {...movingItem}  // 문제의 코드 ::: 초기화를 안시켰으니까 무빙 아이템이 남아 있을수 밖에 없다...
     renderBlock();
@@ -159,34 +182,15 @@ function checkLine() {
         if(check) {
             row.remove();
             createNewLine();
-            score += 100;        
+            score += 100;
+            updateScore(score);
+            console.log(score);
         }
 
     });
-    checkGameover()
-}
-// 게임오버인지 체크하는 함수(블록이 생성되는 2번째줄에 seize 가 있으면 게임을 멈춘다.)
-function checkGameover() {
-    const tr = document.querySelectorAll('tr');
-    const td = tr[1].querySelectorAll('td')
-    console.log(td);
-    let over = false;
-    td.forEach(element => {
-        if(element.classList.contains('seize')) {
-            over = true
-        }
-    });
-
-    console.log(over)
-    if(over === true) {
-        clearInterval(duration);
-        modalGameOver.style.display = 'flex'
-        const table = document.querySelector('table')
-        table.innerHTML = '';
-    }
-
     createBlock()
 }
+
 
 // 움직이는 방향에 포지션값을 더하는 함수 (argument :move type, value)
 function moveItem(movetype, value) {
@@ -201,41 +205,72 @@ function moveDirection() {
     renderBlock();
 }
 
-// 키보드 이벤트 바인딩
-window.addEventListener(`keydown`,(e) => {
-    switch(e.keyCode) {
-        case 38:
-            // direction 값을 올리면 다른 배열을 호출해서 모양이 변하게한다.
-            e.preventDefault();
-            console.log('UP')
-            moveDirection()
-            break;
-        // 나머지 값은 블록을 움직인다.
-        case 39:
-            console.log('RIGHT')
-            moveItem('left', 1);
-            break;
-        case 40:
-            e.preventDefault();
-            console.log('DOWN')
-            moveItem('top', 1);
-            break;
-        case 37:
-            console.log('LEFT')
-            moveItem('left', -1);
-            break;
-        case 32:
-            e.preventDefault();
-            console.log('space');
-    }
-});
 
-// 인터벌실행. speed의 숫자가 되었을때 밑으로 한칸 움직인다. speed를 조정함으로 블록이 떨어지는 속도를 조절할 수 있음.
-const duration = setInterval(() => {
-    countTime++
-    if(countTime === speed) {
-        countTime = 0;
-        moveItem('top', 1);
+
+function keyEvent(e) {
+    if(e.keyCode == 27) {
+        pauseGame();
+        togglepauseModal();
+        return
     }
-    scoreBoard.innerHTML = score;
-}, 1);
+    if(playing) {
+        switch(e.keyCode) {
+            case 38:
+                // direction 값을 올리면 다른 배열을 호출해서 모양이 변하게한다.
+                e.preventDefault();
+                console.log('UP')
+                moveDirection()
+                break;
+            // 나머지 값은 블록을 움직인다.
+            case 39:
+                moveItem('left', 1);
+                break;
+            case 40:
+                moveItem('top', 1);
+                break;
+            case 37:
+                moveItem('left', -1);
+                break;
+            case 32:
+                e.preventDefault();
+                dropBlock()
+                break;
+        }
+    }
+    
+}
+// 스페이스바 
+function dropBlock() {
+    playing = true;
+    clearInterval(downInterval);
+    downInterval = setInterval(()=>{
+        moveItem('top',1);
+    }, 10 );
+}
+// ESC 게임멈춤
+function pauseGame(){
+    if(playing == true) {
+        playing = false;
+        clearInterval(downInterval);
+    } else {
+        playing = true;
+        downInterval = setInterval(()=>{
+            moveItem('top',1);
+        }, 500 );
+    }
+}
+function togglepauseModal() {
+    if(modalPause.classList.contains('is-show')) {
+        modalPause.classList.remove('is-show');
+    } else {
+        modalPause.classList.add('is-show');
+    }
+}
+// score 업데이트 애니메이션
+function updateScore(score) {
+    domScore.classList.add('updating');
+    setTimeout(()=>{
+        domScore.innerText = score;
+        domScore.classList.remove('updating')    
+    },300)
+}
