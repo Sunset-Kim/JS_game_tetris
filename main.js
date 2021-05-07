@@ -10,7 +10,6 @@ const finalScore = document.querySelector('.modal-container .score');
 // 게임에 사용되는 변수
 const MY = 20;
 const MX = 10;
-let playing = false;
 let speed = 500;
 let score = 0;
 let tempMovingItem;
@@ -20,7 +19,9 @@ let movingItem = {
     top: 0,
     left: 3,
 }
+// 상태변수
 let downInterval;
+let playing = false;
 let isGameover = false;
 
 
@@ -28,7 +29,7 @@ let isGameover = false;
 // 실행
 init();
 btnRetry.addEventListener('click',init)
-// 게임을 시작하는 함수
+
 function init() {
     // 스코어 초기화
     resetScore();
@@ -38,7 +39,7 @@ function init() {
     window.addEventListener(`keydown`,keyEvent);
     // 게임 배경만들기
     drawBoard();
-    // 랜덤함 블록 준비하기
+    // 랜덤블록 준비하기
     movingItem.type = createType(); 
     // 미리 움직여줄 블록의 속성을 무빙블록에서 복사함
     tempMovingItem = { ...movingItem };
@@ -61,7 +62,7 @@ function drawBoard() {
     container.innerHTML = boardTag;
 }
 
-// 랜덤타입을 만드는 함수
+// 랜덤한 블록타입을 만드는 함수
 function createType() {
     const block = Object.entries(Block);
     const randomNumber = Math.floor(Math.random()*block.length);
@@ -79,12 +80,10 @@ function createNewLine() {
     tbody.prepend(tr);
 }
 
-
-
 // 블록을 렌더링 하는 함수
 function renderBlock(movetype = '') {
 
-    // 변수를 사용하기 위해서 es6 새로운 문법을 사용함.
+    // es6 문법
     const {type, direction, left, top} = tempMovingItem;
 
     // 기존에 움직였던 블럭을 지워준다.
@@ -97,34 +96,32 @@ function renderBlock(movetype = '') {
     // 블록 타입에 해당하는 모양이 담긴 배열을 가지고 온다.
     const block = Block[type][direction];
 
-    //Some : 해당 블록중에 selctor로 선택한 아이가 없으면 엘리먼트 중에 하나라도 해당 되면 멈추게 한다. 리턴값이 하나라도 true일때 반복을 멈춤다.
+    //Some : 해당 블록중에 selctor로 선택한 아이가 없으면 엘리먼트 중에 하나라도 해당 되면 멈추게 한다. 리턴값이 하나라도 true일때 반복을 멈춤다. <=> every
     block.some(element => {
         const y = element[0] + top;
         const x = element[1] + left;
         const item = (document.querySelector('tbody').childNodes[y]) ? document.querySelector('tbody').childNodes[y].childNodes[x] : null
-        // 움직일 아이템을 선택하지 못했다면 false
         // 가능한 움직임인지 체크 
         const check = checkAvailable(item);
         if(check) {
-            // 움직일 수 있으면 클래스를 달아주고
+            // 움직임 가능할때
             item.classList.add(type, 'moving'); 
         } else {
-            // 원래 임시로 담겨있던 무빙블록아이템으로 다시 반환해준다.
+            // 불가능할때
+            // 원래 임시로 담겨있던 무빙블록아이템으로 다시 반환
             tempMovingItem = { ...movingItem }
-            // 무한 콜스택에서 벗어나기 위해 settimeout을 썼다.
-
-            // 게임종료시 진입 구간
             
-
+            // 게임종료시 진입 구간
             if(movetype == 'retry') {
                 gameOver(score);
                 return;
             }
-
+            
+            // 무한 콜스택에서 벗어나기 위해 settimeout
             setTimeout(()=>{
 
                 renderBlock('retry');
-                // 움직이는 방향이 top y축 값이면 값을 고정한다.
+                // 움직이는 방향이 top y축 값이면 값을 고정
                 if(movetype === 'top') {
                     seizeBlock();
                 }
@@ -149,7 +146,7 @@ function checkAvailable(item) {
     return true;
 }
 
-// 새로운 블록을 만드는 함수 (새로운 블록을 만들때 움직이는 *블록과 움직일 블록 둘다* 초기화 시켜야 된다.)
+// 새로운 블록을 만드는 함수 (새로운 블록을 만들때 움직이는 *블록과 임시 블록 둘다* 초기화 시켜야 된다.)
 function createBlock() {
     clearInterval(downInterval);
     playing = true;
@@ -162,7 +159,7 @@ function createBlock() {
     movingItem.top = 0;
     movingItem.left = 3;
     movingItem.direction = 0;
-    tempMovingItem = {...movingItem}  // 문제의 코드 ::: 초기화를 안시켰으니까 무빙 아이템이 남아 있을수 밖에 없다...
+    tempMovingItem = {...movingItem}  // Error cod: 초기화를 안시켰으니까 무빙 아이템이 남아 있었음.
     renderBlock();
 }
 
@@ -216,8 +213,7 @@ function moveDirection() {
     renderBlock();
 }
 
-
-
+// 키 바인딩 함수
 function keyEvent(e) {
     if(e.keyCode == 27) {
         pauseGame();
@@ -250,13 +246,13 @@ function keyEvent(e) {
     }
     
 }
-// 스페이스바 
+// 스페이스바 함수
 function dropBlock() {
     playing = true;
     clearInterval(downInterval);
     downInterval = setInterval(()=>{
         moveItem('top',1);
-    }, 15 );
+    }, 10 );
 }
 // ESC 게임멈춤
 function pauseGame(){
@@ -270,6 +266,7 @@ function pauseGame(){
         }, 500 );
     }
 }
+
 function togglepauseModal() {
     if(modalPause.classList.contains('is-show')) {
         modalPause.classList.remove('is-show');
@@ -277,12 +274,15 @@ function togglepauseModal() {
         modalPause.classList.add('is-show');
     }
 }
+
 function resetScore() {
     score = 0;
     currentScore.innerText = 0;
     finalScore.innerText = 0;
 }
+// 게임종료
 function gameOver() {
+    // 한번더 체크하기
     let firstTr = document.querySelector('tr');
     console.log(firstTr.children);
     firstTr.querySelectorAll('td').forEach(col => {
@@ -291,7 +291,6 @@ function gameOver() {
             return;
         }
     })
-
 
     if(isGameover) {
         isGameover = false;
@@ -302,6 +301,7 @@ function gameOver() {
     }
     
 }
+
 // score 업데이트 애니메이션
 function updateScore(score) {
     currentScore.classList.add('updating');
