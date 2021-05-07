@@ -13,7 +13,6 @@ const MX = 10;
 let playing = false;
 let speed = 500;
 let score = 0;
-let countTime = 0;
 let tempMovingItem;
 let movingItem = {
     type: '',
@@ -22,6 +21,7 @@ let movingItem = {
     left: 3,
 }
 let downInterval;
+let isGameover = false;
 
 
 
@@ -102,7 +102,6 @@ function renderBlock(movetype = '') {
         const y = element[0] + top;
         const x = element[1] + left;
         const item = (document.querySelector('tbody').childNodes[y]) ? document.querySelector('tbody').childNodes[y].childNodes[x] : null
-        
         // 움직일 아이템을 선택하지 못했다면 false
         // 가능한 움직임인지 체크 
         const check = checkAvailable(item);
@@ -115,12 +114,15 @@ function renderBlock(movetype = '') {
             // 무한 콜스택에서 벗어나기 위해 settimeout을 썼다.
 
             // 게임종료시 진입 구간
+            
+
             if(movetype == 'retry') {
                 gameOver(score);
-                
                 return;
             }
+
             setTimeout(()=>{
+
                 renderBlock('retry');
                 // 움직이는 방향이 top y축 값이면 값을 고정한다.
                 if(movetype === 'top') {
@@ -149,9 +151,9 @@ function checkAvailable(item) {
 
 // 새로운 블록을 만드는 함수 (새로운 블록을 만들때 움직이는 *블록과 움직일 블록 둘다* 초기화 시켜야 된다.)
 function createBlock() {
-    
     clearInterval(downInterval);
     playing = true;
+
     downInterval = setInterval(()=>{
         moveItem('top',1);
     },speed)
@@ -176,9 +178,12 @@ function seizeBlock() {
 
 // 라인을 체크해서 없애는 함수 (로직: 화면에 있는 tr을 가지고 와서 check 변수를 사용해서 한줄에 있는 모든 td의 클래스가 seize를 가지고 있을때 없애자 )
 function checkLine() {
+
     const tr = document.querySelectorAll('tr');
+
     tr.forEach(row => {
         let check = true; // 체크를 트리거로 사용한다.
+        
         const td = row.childNodes
         td.forEach(col => {
             if(!col.classList.contains('seize')) {
@@ -191,7 +196,6 @@ function checkLine() {
             createNewLine();
             score += 100;
             updateScore(score);
-            console.log(score);
         }
 
     });
@@ -220,6 +224,7 @@ function keyEvent(e) {
         togglepauseModal();
         return
     }
+
     if(playing) {
         switch(e.keyCode) {
             case 38:
@@ -251,7 +256,7 @@ function dropBlock() {
     clearInterval(downInterval);
     downInterval = setInterval(()=>{
         moveItem('top',1);
-    }, 10 );
+    }, 15 );
 }
 // ESC 게임멈춤
 function pauseGame(){
@@ -278,10 +283,24 @@ function resetScore() {
     finalScore.innerText = 0;
 }
 function gameOver() {
-    clearInterval(downInterval);
-    finalScore.innerText = score;
-    modalGameOver.classList.add('is-show');
-    window.removeEventListener('keydown',keyEvent);
+    let firstTr = document.querySelector('tr');
+    console.log(firstTr.children);
+    firstTr.querySelectorAll('td').forEach(col => {
+        if(col.classList.contains('seize') || col.classList.contains('moving')) {
+            isGameover = true;
+            return;
+        }
+    })
+
+
+    if(isGameover) {
+        isGameover = false;
+        clearInterval(downInterval);
+        finalScore.innerText = score;
+        modalGameOver.classList.add('is-show');
+        window.removeEventListener('keydown',keyEvent);
+    }
+    
 }
 // score 업데이트 애니메이션
 function updateScore(score) {
