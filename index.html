@@ -8,39 +8,68 @@
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
-    <h1>tetris</h1>
-    <div class="wrap">
-        <div class="container">
-
+    <div id="app">
+        <h1>tetris</h1>
+        <div class="wrap">
+            <div class="container">
+    
+            </div>
+            <div class="info-score">
+                <span class="score">0</span>
+            </div>
+            
+           
         </div>
-        <div class="info-score">
-            <span class="score">0</span>
+    
+        <div class="bg">
+            <img src="./img/bg.jpg" alt="">
         </div>
-        <script src="main.js" type="module"></script>
-       
-    </div>
-
-    <div class="bg">
-        <img src="./img/bg.jpg" alt="">
-    </div>
-
-    <div class="modal-gameover">
-
-        <div class="modal-overlay"></div>
-
-        <div class="modal-container">
-            <h1>Game Over</h1>
-            <h4>Your Score</h4>
-            <span class="score">12</span>
-            <button class="btn-retry">다시시작</button>
+    
+        <div class="modal-gameover">
+    
+            <div class="modal-overlay"></div>
+    
+            <div class="modal-container">
+                <h1>Game Over</h1>
+                <h4>Your Score</h4>
+                <span class="score">12</span>
+                <button class="btn-retry">다시시작</button>
+            </div>
+            
+        </div>
+    
+        <div class="btn__container">
+            <div class="btn__arrow__container">
+                <div class="btn_arrow__container__top">
+                    <button class="btn__arrow up">
+                        ⬆
+                    </button>
+                </div>
+                <div class="btn_arrow__container__bottom">
+                    <button class="btn__arrow left">
+                        ⬅
+                    </button>
+                    <button class="btn__arrow down">
+                        ⬇
+                    </button>
+                    <button class="btn__arrow right"> 
+                        ➡
+                    </button>
+          
+                </div>
+            </div>
+            <div class="btn__action__container">
+                <button class="btn__action">
+                    🔥🔥🔥🔥🔥🔥
+                </button>
+            </div>
         </div>
         
+        <div class="modal-pause">
+            <div class="modal-overlay"></div>
+            <h1>pause</h1>
+        </div>
     </div>
-    
-    <div class="modal-pause">
-        <div class="modal-overlay"></div>
-        <h1>pause</h1>
-    </div>
-
+    <script src="main.js" type="module"></script>
 </body>
 </html>

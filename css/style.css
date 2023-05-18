@@ -2,8 +2,7 @@
 
 
 
-:root {
-    
+:root { 
     --primary: #100233;
     --primary-light: #382984;
     --primary-dark: #0E0230;
@@ -18,22 +17,35 @@
 }
 body {
     margin: 0;
+    min-width: 360px;
+    overflow: scroll;
     height: 100vh;
     background: var(--primary);
+    padding: 0 20px;
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 h1 {
     text-align: center;
-    font-size: 120px;
+    font-size: 60px;
     text-transform: uppercase;
     font-family: 'Akronim', cursive;
     font-weight: normal;
     margin: 0;
     color: #F11F82;
+    margin-bottom: 24px;
 }
 .wrap {
     max-width: 1400px;
-    margin: auto;
+    margin: 0 auto;
     display: flex;
+    gap: 10px;
     justify-content: center;
     align-items: center;
 }
@@ -112,8 +124,8 @@ button {
     cursor: pointer;
 }
 td {
-    width: 25px;
-    height: 25px;
+    width: 18px;
+    height: 18px;
     border: 2px solid #DD2875cc;
 }
 .Tmino {
@@ -169,12 +181,12 @@ td {
 }
 
 .info-score {
+    align-self: flex-start;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 10rem;
-    height: 10rem;
-    margin-left: 50px;
+    width: 8rem;
+    height: 8rem;
     border: 2px solid #DD2875;
     background: #100233c6;
     border-radius: 5px;
@@ -221,4 +233,52 @@ td {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+button.btn__arrow {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    color: var(--primary-light);
+}
+
+button.btn__action {
+    width: 100%;
+    height: 50%;
+    font-size: 25px;
+}
+
+.btn__container {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    max-width: 560px;
+    margin: 0 auto;
+    margin-top: 25px;
+    gap: 25px;
+}
+
+.btn__action__container {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+}
+
+.btn_arrow__container__top {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 5px;
+}
+
+@media screen and (min-width: 600px) {
+    td {
+        width: 25px;
+        height: 25px;
+    }
+
+    .btn__container {
+        visibility: hidden;
+
+    }
+    
 }

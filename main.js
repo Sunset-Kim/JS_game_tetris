@@ -6,11 +6,14 @@ const modalGameOver = document.querySelector('.modal-gameover');
 const btnRetry = document.querySelector('.btn-retry');
 const modalPause = document.querySelector('.modal-pause');
 const finalScore = document.querySelector('.modal-container .score');
+const btnArrows = document.querySelectorAll('.btn__arrow');
+const btnAction = document.querySelector('.btn__action');
 
 // 게임에 사용되는 변수
 const MY = 20;
 const MX = 10;
 let speed = 500;
+let level = 0;
 let score = 0;
 let tempMovingItem;
 let movingItem = {
@@ -33,6 +36,8 @@ btnRetry.addEventListener('click',init)
 function init() {
     // 스코어 초기화
     resetScore();
+    // 레벨 초기화
+    resetLevel()
     // modal 초기화
     modalGameOver.classList.remove('is-show');
     // 키보드 이벤트 바인딩
@@ -193,6 +198,7 @@ function checkLine() {
             createNewLine();
             score += 100;
             updateScore(score);
+            updateLevel(score);
         }
 
     });
@@ -215,6 +221,7 @@ function moveDirection() {
 
 // 키 바인딩 함수
 function keyEvent(e) {
+    e.preventDefault();
     if(e.keyCode == 27) {
         pauseGame();
         togglepauseModal();
@@ -224,10 +231,8 @@ function keyEvent(e) {
     if(playing) {
         switch(e.keyCode) {
             case 38:
-                // direction 값을 올리면 다른 배열을 호출해서 모양이 변하게한다.
-                e.preventDefault();
                 moveDirection()
-                break;
+                break; 
             // 나머지 값은 블록을 움직인다.
             case 39:
                 moveItem('left', 1);
@@ -284,7 +289,7 @@ function resetScore() {
 function gameOver() {
     // 한번더 체크하기
     let firstTr = document.querySelector('tr');
-    console.log(firstTr.children);
+    
     firstTr.querySelectorAll('td').forEach(col => {
         if(col.classList.contains('seize') || col.classList.contains('moving')) {
             isGameover = true;
@@ -310,3 +315,34 @@ function updateScore(score) {
         currentScore.classList.remove('updating')    
     },300)
 }
+
+function updateLevel(score) {
+    const calculatedLevel = Math.floor(score / 300);
+    if(calculatedLevel === level) return;
+    level = calculatedLevel;
+    speed -=  30;
+}
+
+function resetLevel() {
+    level = 0
+    speed = 500
+}
+
+const DIRECTION_FN_MAP = {
+    UP: () => moveDirection(),
+    LEFT: () => moveItem('left', -1),
+    DOWN: () => moveItem('top', 1),
+    RIGHT: () => moveItem('left', 1),
+}
+
+
+Array.from(btnArrows).forEach(btn => {
+    const [_, direction] = btn.className.split(' ');
+    const key = direction.toUpperCase();
+
+    btn.addEventListener('click',DIRECTION_FN_MAP[key])
+})
+
+btnAction.addEventListener('click', dropBlock)
+
+
