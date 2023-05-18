@@ -1,6 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Akronim&display=swap');
 
 
+.disable-dbl-tap-zoom {
+    touch-action: manipulation;
+}
 
 :root { 
     --primary: #100233;
